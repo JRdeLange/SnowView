@@ -68,13 +68,15 @@ class cyclist {
         this.direction = direction;
 
         // constants
-        this.speed = 2.5;
+        this.speed = 2 + Math.random();
         this.width = 2;
 
         this.bike_length = 50;
         this.direction_momentum = 0;
-        this.turn_speed = 0.005;
-        this.max_turn_speed = 0.015;
+        this.direction_momentum_zeroing_factor = 0.925;
+        this.turn_speed = 0.025;
+        this.max_turn_speed = 0.33;
+
 
         this.rear_x = this.front_x - this.bike_length * Math.cos(this.direction);
         this.rear_y = this.front_y - this.bike_length * Math.sin(this.direction);
@@ -102,14 +104,14 @@ class cyclist {
 
 
         // wrap around the canvas with a box of 2*bike_length around the canvas
-        if (this.front_x < - 2 * this.bike_length) {
-            this.front_x = canvas.width + this.front_x + 2 * this.bike_length;
-            this.rear_x = canvas.width + this.rear_x + 2 * this.bike_length;
-        }
-        if (this.front_x > canvas.width + 2 * this.bike_length) {
-            this.front_x = this.front_x - canvas.width - 2 * this.bike_length;
-            this.rear_x = this.rear_x - canvas.width - 2 * this.bike_length;
-        }
+        // if (this.front_x < - 2 * this.bike_length) {
+        //     this.front_x = canvas.width + this.front_x + 2 * this.bike_length;
+        //     this.rear_x = canvas.width + this.rear_x + 2 * this.bike_length;
+        // }
+        // if (this.front_x > canvas.width + 2 * this.bike_length) {
+        //     this.front_x = this.front_x - canvas.width - 2 * this.bike_length;
+        //     this.rear_x = this.rear_x - canvas.width - 2 * this.bike_length;
+        // }
         if (this.front_y < - 2 * this.bike_length) {
             this.front_y = canvas.height + this.front_y + 2 * this.bike_length;
             this.rear_y = canvas.height + this.rear_y + 2 * this.bike_length;
@@ -126,6 +128,8 @@ class cyclist {
         if (Math.abs(this.direction_momentum) > this.max_turn_speed) {
             this.direction_momentum = Math.sign(this.direction_momentum) * this.max_turn_speed;
         }
+
+        this.direction_momentum *= this.direction_momentum_zeroing_factor;
 
         this.direction += this.direction_momentum;
 
@@ -148,17 +152,19 @@ window.addEventListener('resize', resizeCanvas);
 // Initialize the canvas size and draw the initial bitmap
 resizeCanvas();
 
+snow_scaling_factor = (canvas.width * canvas.height) / (1920 * 1080);
+snow(150000 * snow_scaling_factor, 5);
+
+
 let cyclists = [];
-for (let i = 0; i < 5; i++) {
+n_cyclists = Math.random() * 35 * snow_scaling_factor;
+for (let i = 0; i < n_cyclists; i++) {
     cyclists.push(new cyclist(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2 * Math.PI));
 }
 
-snow(200000, 4);
-
-
 function mainLoop() {
     // Update the bitmap or perform any animations here
-    snow(150, 2 + Math.random() * 3);
+    snow(250 * snow_scaling_factor, 2 + Math.random() * 3);
 
     // Move the cyclists
     for (let i = 0; i < cyclists.length; i++) {
@@ -183,15 +189,9 @@ function snow(n_flakes, size) {
 
         for (let j = 0; j < pixels.length; j++) {
             let pixel = pixels[j];
-            approach_color_by_fraction([255, 255, 255, 255], 0.65, pixel[0], pixel[1]);
+            approach_color_by_fraction([255, 255, 255, 255], 0.75, pixel[0], pixel[1]);
         }
     }
-
-}
-
-function draw_snowflake(x, y, size) {
-    // draw a circle of radius size at (x, y)
-    bitmap.data[index + 0] = 255; // R
 
 }
 
